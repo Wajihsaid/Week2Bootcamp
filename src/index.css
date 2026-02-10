@@ -1,0 +1,166 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Source+Sans+3:wght@300;400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 35 30% 80%;
+    --foreground: 20 25% 15%;
+
+    --card: 35 25% 92%;
+    --card-foreground: 20 25% 15%;
+
+    --popover: 35 30% 95%;
+    --popover-foreground: 20 25% 15%;
+
+    --primary: 15 65% 48%;
+    --primary-foreground: 35 30% 97%;
+
+    --secondary: 210 55% 45%;
+    --secondary-foreground: 210 80% 98%;
+
+    --muted: 35 15% 85%;
+    --muted-foreground: 20 10% 45%;
+
+    --accent: 80 30% 40%;
+    --accent-foreground: 80 20% 98%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 30 20% 82%;
+    --input: 30 20% 82%;
+    --ring: 15 65% 48%;
+
+    --radius: 0.75rem;
+
+    --ceramic: 210 55% 45%;
+    --ceramic-foreground: 210 80% 98%;
+    --sand: 38 40% 78%;
+    --sand-light: 38 35% 88%;
+    --terracotta: 15 65% 48%;
+    --terracotta-dark: 15 60% 35%;
+    --olive: 80 30% 40%;
+    --gold: 42 75% 55%;
+    --warm-cream: 35 30% 95%;
+
+    --sidebar-background: 35 25% 92%;
+    --sidebar-foreground: 20 25% 15%;
+    --sidebar-primary: 15 65% 48%;
+    --sidebar-primary-foreground: 35 30% 97%;
+    --sidebar-accent: 35 15% 85%;
+    --sidebar-accent-foreground: 20 25% 15%;
+    --sidebar-border: 30 20% 82%;
+    --sidebar-ring: 15 65% 48%;
+
+    --font-display: 'Playfair Display', serif;
+    --font-body: 'Source Sans 3', sans-serif;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-body);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
+  }
+}
+
+/* Tunisian mosaic pattern overlay */
+.mosaic-pattern {
+  background-image:
+    radial-gradient(circle at 25% 25%, hsl(var(--sand) / 0.15) 2px, transparent 2px),
+    radial-gradient(circle at 75% 75%, hsl(var(--ceramic) / 0.08) 2px, transparent 2px);
+  background-size: 40px 40px;
+}
+
+/* Geometric border inspired by Tunisian tiles */
+.tile-border {
+  border-image: repeating-linear-gradient(90deg,
+      hsl(var(--terracotta)),
+      hsl(var(--terracotta)) 8px,
+      hsl(var(--ceramic)) 8px,
+      hsl(var(--ceramic)) 16px,
+      hsl(var(--gold)) 16px,
+      hsl(var(--gold)) 24px) 4;
+}
+
+/* Glow pulse for active speaking */
+@keyframes speak-pulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 20px hsl(var(--ceramic) / 0.3);
+  }
+
+  50% {
+    box-shadow: 0 0 40px hsl(var(--ceramic) / 0.6), 0 0 60px hsl(var(--terracotta) / 0.2);
+  }
+}
+
+.speaking-glow {
+  animation: speak-pulse 2s ease-in-out infinite;
+}
+
+/* Voice wave animation */
+@keyframes wave {
+
+  0%,
+  100% {
+    transform: scaleY(0.3);
+  }
+
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+.voice-wave-bar {
+  animation: wave 1.2s ease-in-out infinite;
+}
+
+/* Smooth fade-in */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.6s ease-out forwards;
+}
+
+/* Scrollbar styling */
+.chat-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-scroll::-webkit-scrollbar-track {
+  background: hsl(var(--sand-light));
+  border-radius: 3px;
+}
+
+.chat-scroll::-webkit-scrollbar-thumb {
+  background: hsl(var(--sand));
+  border-radius: 3px;
+}
