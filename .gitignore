@@ -1,0 +1,100 @@
+# Root Git ignore for Week2Bootcamp
+# Covers frontend (Vite/TypeScript), backend (FastAPI/Python), notebooks, and local env/secrets.
+
+# =========================
+# Global OS/Editor files
+# =========================
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*.bak
+*.tmp
+*.log
+.vscode/
+.idea/
+*.iml
+
+# =========================
+# Frontend (Vite/TypeScript)
+# =========================
+frontend/node_modules/
+frontend/.pnpm-store/
+frontend/.parcel-cache/
+frontend/.vite/
+frontend/dist/
+frontend/.eslintcache
+frontend/.cache/
+frontend/coverage/
+
+# Local environment files
+frontend/.env
+frontend/.env.*
+
+# =========================
+# Backend (FastAPI/Python)
+# =========================
+backend/.venv/
+backend/venv/
+backend/env/
+backend/.python-version
+backend/__pycache__/
+backend/**/__pycache__/
+backend/.pytest_cache/
+backend/.mypy_cache/
+backend/.ruff_cache/
+backend/.coverage
+backend/.cache/
+backend/.ipynb_checkpoints/
+backend/coverage/
+
+# Python build artifacts
+backend/build/
+backend/dist/
+backend/*.egg-info/
+
+# Local environment files & secrets
+backend/.env
+backend/.env.*
+
+# Logs
+backend/*.log
+backend/logs/
+
+# =========================
+# Data & generated indices
+# =========================
+# Keep dataset out of repo unless explicitly intended
+backend/app/data/documents/*.csv
+backend/app/data/documents/*.json
+backend/app/data/documents/*.tsv
+
+# Generated vector index/cache
+backend/app/data/faiss_index/
+
+# =========================
+# Notebooks & temp outputs
+# =========================
+*.ipynb_checkpoints/
+TTS_STT.ipynb
+
+# =========================
+# Supabase & platform-specific
+# =========================
+supabase/.env
+supabase/.temp
+
+# =========================
+# Misc
+# =========================
+*.env
+.env
+*.local
+*.secret
+
+# Ignore any temporary batch scripts if created
+backend/setup_dataset.bat
+
+# Images cache (if any tool generates)
+frontend/public/*.map
+

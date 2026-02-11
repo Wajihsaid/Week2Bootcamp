@@ -14,7 +14,9 @@ interface ChatInterfaceProps {
   onBack: () => void;
 }
 
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/historical-chat`;
+const CHAT_URL = `${import.meta.env.VITE_API_URL ?? "http://localhost:8000"}/api/chat`;
+const TTS_URL = `${import.meta.env.VITE_API_URL ?? "http://localhost:8000"}/api/tts`;
+const STT_URL = `${import.meta.env.VITE_API_URL ?? "http://localhost:8000"}/api/stt`;
 
 const ChatInterface = ({ character, onBack }: ChatInterfaceProps) => {
   const [messages, setMessages] = useState<Message[]>([
@@ -28,10 +30,41 @@ const ChatInterface = ({ character, onBack }: ChatInterfaceProps) => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const lastAssistantSpokenRef = useRef<string>(""); // track last spoken text to avoid duplicate playback
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Auto-play TTS when the latest message is from assistant and changed
+  useEffect(() => {
+    const last = messages[messages.length - 1];
+    if (!last || last.role !== "assistant") return;
+    const text = last.content?.trim();
+    if (!text) return;
+    if (text === lastAssistantSpokenRef.current) return; // already played for this text
+
+    // Fetch TTS audio and play
+    const playVoice = async () => {
+      try {
+        const resp = await fetch(TTS_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text, characterId: character.id }),
+        });
+        if (!resp.ok) return;
+        const blob = await resp.blob();
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        audio.play();
+        lastAssistantSpokenRef.current = text;
+      } catch (err) {
+        console.warn("TTS playback failed:", err);
+      }
+    };
+
+    playVoice();
+  }, [messages, character.id]);
 
   const sendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return;
@@ -46,17 +79,35 @@ const ChatInterface = ({ character, onBack }: ChatInterfaceProps) => {
     try {
       const resp = await fetch(CHAT_URL, {
         method: "POST",
+        mode: "cors",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
         body: JSON.stringify({
           messages: allMessages.map((m) => ({ role: m.role, content: m.content })),
           characterId: character.id,
+          stream: true, // ensure streaming responses
         }),
       });
 
       if (!resp.ok || !resp.body) {
+        // Fallback to non-streaming request
+        const nonStream = await fetch(CHAT_URL, {
+          method: "POST",
+          mode: "cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            messages: allMessages.map((m) => ({ role: m.role, content: m.content })),
+            characterId: character.id,
+            stream: false,
+          }),
+        });
+        if (nonStream.ok) {
+          const data = await nonStream.json();
+          const answer = (data && data.answer) || "";
+          setMessages((prev) => [...prev, { role: "assistant", content: answer || "(No answer)" }]);
+          return;
+        }
         const errData = await resp.json().catch(() => ({}));
         throw new Error(errData.error || "Failed to get response");
       }
@@ -87,7 +138,7 @@ const ChatInterface = ({ character, onBack }: ChatInterfaceProps) => {
           let line = textBuffer.slice(0, newlineIndex);
           textBuffer = textBuffer.slice(newlineIndex + 1);
           if (line.endsWith("\r")) line = line.slice(0, -1);
-          if (line.startsWith(":") || line.trim() === "") continue;
+          if (line.startsWith(":" ) || line.trim() === "") continue;
           if (!line.startsWith("data: ")) continue;
           const jsonStr = line.slice(6).trim();
           if (jsonStr === "[DONE]") { streamDone = true; break; }
@@ -96,9 +147,30 @@ const ChatInterface = ({ character, onBack }: ChatInterfaceProps) => {
             const content = parsed.choices?.[0]?.delta?.content as string | undefined;
             if (content) upsert(content);
           } catch {
-            textBuffer = line + "\n" + textBuffer;
+            // If parsing fails, stop streaming and fallback
+            streamDone = true;
             break;
           }
+        }
+      }
+
+      // If streaming produced nothing, fallback to non-streaming once
+      if (!assistantSoFar) {
+        const nonStream = await fetch(CHAT_URL, {
+          method: "POST",
+          mode: "cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            messages: allMessages.map((m) => ({ role: m.role, content: m.content })),
+            characterId: character.id,
+            stream: false,
+          }),
+        });
+        if (nonStream.ok) {
+          const data = await nonStream.json();
+          const answer = (data && data.answer) || "";
+          setMessages((prev) => [...prev, { role: "assistant", content: answer || "(No answer)" }]);
+          return;
         }
       }
     } catch (e: any) {
@@ -147,7 +219,16 @@ const ChatInterface = ({ character, onBack }: ChatInterfaceProps) => {
   };
 
   const transcribeAudio = async (audioBlob: Blob) => {
-    // Placeholder for speech-to-text integration
+    // Optional: integrate STT endpoint when ready
+    // const form = new FormData();
+    // form.append("file", audioBlob, "recording.webm");
+    // try {
+    //   const resp = await fetch(STT_URL, { method: "POST", body: form });
+    //   const data = await resp.json();
+    //   setInput(data.text ?? "");
+    // } catch (err) {
+    //   console.error("STT failed:", err);
+    // }
     setInput("(Voice message transcription would appear here)");
     console.log("Audio blob ready for transcription:", audioBlob);
   };
@@ -374,3 +455,4 @@ const ChatInterface = ({ character, onBack }: ChatInterfaceProps) => {
 };
 
 export default ChatInterface;
+

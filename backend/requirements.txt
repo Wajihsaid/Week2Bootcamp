@@ -1,0 +1,42 @@
+# FastAPI Backend Dependencies
+# Successfully tested on Python 3.14 / Windows
+# ============================
+
+# Core Framework
+fastapi
+uvicorn[standard]
+python-multipart
+pydantic
+pydantic-settings
+python-jose
+
+# Data Processing
+pandas
+numpy
+
+# NLP & Transformers
+# Install PyTorch first with: pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+torch
+transformers
+sentence-transformers
+
+# Vector Database
+faiss-cpu
+
+# Text-to-Speech
+edge-tts
+
+# Speech-to-Text
+SpeechRecognition
+pydub
+
+# Async Support
+aiofiles
+httpx
+
+# Environment
+python-dotenv
+
+# Logging
+loguru
+
